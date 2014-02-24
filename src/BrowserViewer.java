@@ -50,7 +50,6 @@ public class BrowserViewer extends JPanel
     private JButton myNextButton;
     private JButton myHomeButton;
     // favorites
-    private JButton myAddButton;
     private DefaultComboBoxModel myFavorites;
     // get strings from resource file
     private ResourceBundle myResources;
@@ -215,9 +214,9 @@ public class BrowserViewer extends JPanel
     {
         JPanel result = new JPanel();
 
-        myBackButton = makeButton(myResources.getString("BackCommand"));
-        myBackButton.addActionListener(new ActionListener()
+        myBackButton = makeButton("BackCommand", new ActionListener()
         {
+            @Override
             public void actionPerformed (ActionEvent e)
             {
                 back();
@@ -225,9 +224,9 @@ public class BrowserViewer extends JPanel
         });
         result.add(myBackButton);
 
-        myNextButton = makeButton(myResources.getString("NextCommand"));
-        myNextButton.addActionListener(new ActionListener()
+        myNextButton = makeButton("NextCommand", new ActionListener()
         {
+            @Override
             public void actionPerformed (ActionEvent e)
             {
                 next();
@@ -235,9 +234,9 @@ public class BrowserViewer extends JPanel
         });
         result.add(myNextButton);
 
-        myHomeButton = makeButton(myResources.getString("HomeCommand"));
-        myHomeButton.addActionListener(new ActionListener()
+        myHomeButton = makeButton("HomeCommand", new ActionListener()
         {
+            @Override
             public void actionPerformed (ActionEvent e)
             {
                 home();
@@ -246,10 +245,7 @@ public class BrowserViewer extends JPanel
         result.add(myHomeButton);
 
         // if user presses button, load/show the URL
-        JButton goButton = makeButton(myResources.getString("GoCommand"));
-        goButton.addActionListener(new ShowPageAction());
-        result.add(goButton);
-
+        result.add(makeButton("GoCommand", new ShowPageAction()));
         // if user presses return, load/show the URL
         myURLDisplay = new JTextField(35);
         myURLDisplay.addActionListener(new ShowPageAction());
@@ -263,21 +259,21 @@ public class BrowserViewer extends JPanel
     {
         JPanel result = new JPanel();
 
-        myAddButton = makeButton(myResources.getString("AddFavoriteCommand"));
-        myAddButton.addActionListener(new ActionListener()
+        result.add(makeButton("AddFavoriteCommand", new ActionListener()
         {
+            @Override
             public void actionPerformed (ActionEvent e)
             {
                 addFavorite();
             }
-        });
-        result.add(myAddButton);
+        }));
 
         myFavorites = new DefaultComboBoxModel();
         myFavorites.addElement(myResources.getString("FavoriteFirstItem"));
         JComboBox favoritesDisplay = new JComboBox(myFavorites);
         favoritesDisplay.addActionListener(new ActionListener()
         {
+            @Override
             public void actionPerformed (ActionEvent e)
             {
                 showFavorite(myFavorites.getSelectedItem().toString());
@@ -285,30 +281,34 @@ public class BrowserViewer extends JPanel
         });
         result.add(favoritesDisplay);
 
-        JButton setHomeButton = makeButton(myResources.getString("SetHomeCommand"));
-        setHomeButton.addActionListener(new ActionListener()
+        result.add(makeButton("SetHomeCommand", new ActionListener()
         {
+            @Override
             public void actionPerformed (ActionEvent e)
             {
                 myModel.setHome();
                 enableButtons();
             }
-        });
-        result.add(setHomeButton);
+        }));
 
         return result;
     }
-    
-    private JButton makeButton (String label)
+
+    // makes a button using either an image or a label
+    private JButton makeButton (String property, ActionListener listener)
     {
+        JButton result = null;
+        String label = myResources.getString(property);
         if (label.endsWith("gif"))
         {
-            return new JButton(new ImageIcon(getClass().getResource(DEFAULT_RESOURCE_PACKAGE + label)));
+            result = new JButton(new ImageIcon(getClass().getResource(DEFAULT_RESOURCE_PACKAGE + label)));
         }
         else
         {
-            return new JButton(label);
+            result = new JButton(label);
         }
+        myBackButton.addActionListener(listener);
+        return result;
     }
 
     /**
