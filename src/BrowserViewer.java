@@ -5,7 +5,9 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ResourceBundle;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -36,6 +38,7 @@ public class BrowserViewer extends JPanel
     public static final Dimension SIZE = new Dimension(800, 600);
     public static final String PROTOCOL_PREFIX = "http://";
     public static final String BLANK = " ";
+    public static final String DEFAULT_RESOURCE_PACKAGE = "resources/";
 
     // web page
     private JEditorPane myPage;
@@ -49,16 +52,19 @@ public class BrowserViewer extends JPanel
     // favorites
     private JButton myAddButton;
     private DefaultComboBoxModel myFavorites;
-    private JComboBox myFavoritesDisplay;
+    // get strings from resource file
+    private ResourceBundle myResources;
     // the data
     private BrowserModel myModel;
 
     /**
      * Create a view of the given model of a web browser.
      */
-    public BrowserViewer (BrowserModel model)
+    public BrowserViewer (BrowserModel model, String language)
     {
         myModel = model;
+        // use resources for labels
+        myResources = ResourceBundle.getBundle(DEFAULT_RESOURCE_PACKAGE + language);
         // add components to frame
         setLayout(new BorderLayout());
         // must be first since other panels may refer to page
@@ -148,8 +154,8 @@ public class BrowserViewer extends JPanel
     private void addFavorite ()
     {
         String name = JOptionPane.showInputDialog(this,
-                                                  "Enter name",
-                                                  "Add Favorite",
+                                                  myResources.getString("FavoritePrompt"),
+                                                  myResources.getString("FavoritePromptTitle"),
                                                   JOptionPane.QUESTION_MESSAGE);
         // did user make a choice?
         if (name != null)
@@ -209,7 +215,7 @@ public class BrowserViewer extends JPanel
     {
         JPanel result = new JPanel();
 
-        myBackButton = new JButton("Back");
+        myBackButton = makeButton(myResources.getString("BackCommand"));
         myBackButton.addActionListener(new ActionListener()
         {
             public void actionPerformed (ActionEvent e)
@@ -219,7 +225,7 @@ public class BrowserViewer extends JPanel
         });
         result.add(myBackButton);
 
-        myNextButton = new JButton("Next");
+        myNextButton = makeButton(myResources.getString("NextCommand"));
         myNextButton.addActionListener(new ActionListener()
         {
             public void actionPerformed (ActionEvent e)
@@ -229,7 +235,7 @@ public class BrowserViewer extends JPanel
         });
         result.add(myNextButton);
 
-        myHomeButton = new JButton("Home");
+        myHomeButton = makeButton(myResources.getString("HomeCommand"));
         myHomeButton.addActionListener(new ActionListener()
         {
             public void actionPerformed (ActionEvent e)
@@ -240,7 +246,7 @@ public class BrowserViewer extends JPanel
         result.add(myHomeButton);
 
         // if user presses button, load/show the URL
-        JButton goButton = new JButton("Go");
+        JButton goButton = makeButton(myResources.getString("GoCommand"));
         goButton.addActionListener(new ShowPageAction());
         result.add(goButton);
 
@@ -257,7 +263,7 @@ public class BrowserViewer extends JPanel
     {
         JPanel result = new JPanel();
 
-        myAddButton = new JButton("Add Favorite");
+        myAddButton = makeButton(myResources.getString("AddFavoriteCommand"));
         myAddButton.addActionListener(new ActionListener()
         {
             public void actionPerformed (ActionEvent e)
@@ -268,18 +274,18 @@ public class BrowserViewer extends JPanel
         result.add(myAddButton);
 
         myFavorites = new DefaultComboBoxModel();
-        myFavorites.addElement(" All Favorites ");
-        myFavoritesDisplay = new JComboBox(myFavorites);
-        myFavoritesDisplay.addActionListener(new ActionListener()
+        myFavorites.addElement(myResources.getString("FavoriteFirstItem"));
+        JComboBox favoritesDisplay = new JComboBox(myFavorites);
+        favoritesDisplay.addActionListener(new ActionListener()
         {
             public void actionPerformed (ActionEvent e)
             {
                 showFavorite(myFavorites.getSelectedItem().toString());
             }
         });
-        result.add(myFavoritesDisplay);
+        result.add(favoritesDisplay);
 
-        JButton setHomeButton = new JButton("Set Home");
+        JButton setHomeButton = makeButton(myResources.getString("SetHomeCommand"));
         setHomeButton.addActionListener(new ActionListener()
         {
             public void actionPerformed (ActionEvent e)
@@ -291,6 +297,18 @@ public class BrowserViewer extends JPanel
         result.add(setHomeButton);
 
         return result;
+    }
+    
+    private JButton makeButton (String label)
+    {
+        if (label.endsWith("gif"))
+        {
+            return new JButton(new ImageIcon(getClass().getResource(DEFAULT_RESOURCE_PACKAGE + label)));
+        }
+        else
+        {
+            return new JButton(label);
+        }
     }
 
     /**
