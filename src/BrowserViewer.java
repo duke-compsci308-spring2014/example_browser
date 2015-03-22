@@ -307,7 +307,7 @@ public class BrowserViewer extends JPanel
         {
             result = new JButton(label);
         }
-        myBackButton.addActionListener(listener);
+        result.addActionListener(listener);
         return result;
     }
 
